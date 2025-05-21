@@ -1,14 +1,13 @@
 package dev.glowie.townySpacePorts.utils;
 
 import com.palmergames.bukkit.towny.TownyAPI;
-import com.palmergames.bukkit.towny.confirmations.Confirmation;
+import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.TownBlock;
 import dev.glowie.townySpacePorts.TownySpacePorts;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -123,6 +122,29 @@ public class SpaceUtils {
             }
         }
         return false;
+    }
+    public static void transferOtherPorts(TownBlock conqueredTownBlock, Town attackingTown) {
+
+        if (!SpaceUtils.isPort(conqueredTownBlock)) {
+            return;
+        }
+
+        ConfigurationSection port = SpaceUtils.findPortFromPlot(conqueredTownBlock);
+        String portName = SpaceUtils.findPortNameFromPlot(conqueredTownBlock);
+
+
+
+        if (attackingTown == null) return;
+
+        if (ConfigUtils.conquersRestSameName(port)) {
+            for (String world : ConfigUtils.getConfig().getConfigurationSection(portName).getKeys(false)) {
+                Location loc = ConfigUtils.getPortLocationXYZ(ConfigUtils.getPortSettings(portName, world), Bukkit.getWorld(world));
+                if (!TownyAPI.getInstance().isWilderness(loc)) {
+                    TownyAPI.getInstance().getTownBlock(loc).setTown(attackingTown);
+                    TownyAPI.getInstance().getTownBlock(loc).save();
+                }
+            }
+        }
     }
 
 }
